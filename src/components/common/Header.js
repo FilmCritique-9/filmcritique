@@ -8,7 +8,7 @@ import deleteIcon from "../../assets/icon/delete.svg";
 import QuitWriteModal from "../writereview/QuitWriteModal";
 import EditReviewModal from "../reviewdetail/EditReviewModal";
 import DeleteReviewModal from "../reviewdetail/DeleteReviewModal";
-const Header = () => {
+const Header = ({ onButtonClick }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
@@ -21,11 +21,16 @@ const Header = () => {
   const closeEditModal = () => setIsEditModalOpen(false);
   const openDeleteModal = () => setIsDeleteModalOpen(true);
   const closeDeleteModal = () => setIsDeleteModalOpen(false);
+  const handleFormSubmit = () => {
+    if (onButtonClick) {
+      onButtonClick();
+      console.log("click");
+    }
+  };
 
   return (
     <>
       <StyledHeader pathname={pathname}>
-        {/* 리뷰 목록 페이지 헤더 */}
         {pathname === "/" && (
           <>
             <Title onClick={() => navigate("/")}>FilmCritique</Title>
@@ -34,15 +39,13 @@ const Header = () => {
             </ActionButton>
           </>
         )}
-        {/* 리뷰 작성 페이지 헤더 */}
-        {pathname === "/writeReview" && (
+        {pathname.startsWith("/writeReview") && (
           <>
             <BackImg src={back} onClick={openQuitModal} />
-            <ActionButton>Submit</ActionButton>
+            <ActionButton onClick={handleFormSubmit}>Submit</ActionButton>{" "}
           </>
         )}
-        {/* 리뷰 상세 페이지 헤더*/}
-        {pathname === "/reviewDetail" && (
+        {pathname.startsWith("/reviewDetail") && (
           <>
             <BackImg src={whiteback} onClick={() => navigate(-1)} />
             <ButtonContainer>
@@ -55,10 +58,10 @@ const Header = () => {
       {isQuitModalOpen && pathname === "/writeReview" && (
         <QuitWriteModal closeModal={closeQuitModal} />
       )}
-      {isEditModalOpen && pathname === "/reviewDetail" && (
+      {isEditModalOpen && pathname.startsWith("/reviewDetail") && (
         <EditReviewModal closeModal={closeEditModal} />
       )}
-      {isDeleteModalOpen && pathname === "/reviewDetail" && (
+      {isDeleteModalOpen && pathname.startsWith("/reviewDetail") && (
         <DeleteReviewModal closeModal={closeDeleteModal} />
       )}
     </>
@@ -74,8 +77,10 @@ const StyledHeader = styled.div`
   padding: 16px;
   align-items: center;
   align-self: stretch;
+  z-index: ${({ pathname }) =>
+    pathname.startsWith("/reviewDetail") ? "3" : "1"};
   background: ${({ pathname }) =>
-    pathname === "/reviewDetail"
+    pathname.startsWith("/reviewDetail")
       ? "#0000004d"
       : "var(--surface-surface-primary, #f6f6f6)"};
 `;

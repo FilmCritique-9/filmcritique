@@ -8,8 +8,9 @@ function Router() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/writeReview" element={<WriteReview />} />
-        <Route path="/reviewDetail" element={<ReviewDetail />} />
+        <Route path="/writeReview/" element={<WriteReview />} />
+        <Route path="/writeReview/:reviewid" element={<WriteReview />} />
+        <Route path="/reviewDetail/:reviewid" element={<ReviewDetail />} />
       </Routes>
     </BrowserRouter>
   );

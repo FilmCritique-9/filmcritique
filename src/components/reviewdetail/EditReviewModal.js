@@ -1,12 +1,16 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BodyBoldMd, BodyMediumXs } from "../../styles/font";
+import { instance } from "../../api/instance";
 
 const EditReviewModal = ({ closeModal }) => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const inputRefs = useRef([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const {reviewid} = useParams();
+  const [isPendingRequest, setIsPendingRequest] = useState(false);
 
   const handleCloseModal = () => {
     closeModal();
@@ -22,6 +26,35 @@ const EditReviewModal = ({ closeModal }) => {
     // 다음 입력창으로 포커스 이동
     if (value && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleEditReview = async () => {
+    if (isPendingRequest) return;
+
+    const headers = {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    };
+
+    try {
+      setIsPendingRequest(true);
+      const res = await instance.post(
+        `/critique/review/${reviewid}/password/`,
+        {password},
+        {headers}
+      );
+
+      if (res.status === 200 && res.data.password === true) {
+        await instance.patch(`/critique/review/${reviewid}/`, {}, {headers});
+        navigate(`/writeReview/${reviewid}`);
+      } else {
+        setErrorMessage("비밀번호가 틀렸습니다.");
+      }
+    } catch (error) {
+      console.error("Error checking password:", error);
+      setErrorMessage("서버 오류가 발생했습니다.");
+    } finally {
+      setIsPendingRequest(false);
     }
   };
 
@@ -47,9 +80,10 @@ const EditReviewModal = ({ closeModal }) => {
               />
             ))}
           </PasswordContainer>
+          <ErrorMessage>{errorMessage}</ErrorMessage>
           <ButtonContainer>
-            <CancelButton onClick={handleCloseModal}>취소</CancelButton>
-            <ConfirmButton>수정하기</ConfirmButton>
+            <CancelButton onClick={handleCloseModal} disabled={isPendingRequest}>취소</CancelButton>
+            <ConfirmButton onClick={handleEditReview} disabled={isPendingRequest}>수정하기</ConfirmButton>
           </ButtonContainer>
         </ModalContent>
       </ModalContainer>
@@ -149,4 +183,10 @@ const PasswordInput = styled.input`
   font-weight: bold;
   line-height: 30px;
   outline: none;
+`;
+
+const ErrorMessage = styled.div`
+color: red;
+font-size: 12px;
+text-align: center;
 `;

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Rating } from "react-simple-star-rating";
 
-const StarRate = () => {
-  const [, setRating] = useState(0);
-
-  const handleRating = (rate) => setRating(rate);
-  const [ratingValue, setRatingValue] = useState(0);
-
+const StarRate = ({onChange, value}) => {
+  const handleRating = (rate) => {
+    onChange(rate);
+  };
+  
   return (
     <div className="box">
       <div className="demo">

@@ -3,35 +3,34 @@ import Line from "../common/Line";
 import styled from "styled-components";
 import star from "../../assets/icon/star.svg";
 import { useNavigate } from "react-router-dom";
-const ReviewItem = () => {
+import dayjs from "dayjs";
+
+const ReviewItem = ({ reviewData }) => {
   const navigate = useNavigate();
   return (
     <StyledReviewItem
       onClick={() => {
-        navigate("/reviewDetail");
+        navigate(`/reviewDetail/${reviewData.id}`);
       }}
     >
       <Line />
       <ItemContainer>
-        <PosterImg />
+        <PosterImg src={reviewData.poster} alt="poster" />
         <Text>
           <div className="title-createtime">
-            <MovieTitle>녹색 광선</MovieTitle>
-            <UploadTime>10분 전</UploadTime>
+            <MovieTitle>{reviewData.title}</MovieTitle>
+            <UploadTime>
+              {dayjs(reviewData.created_at).format("MM-DD HH:mm")}
+            </UploadTime>
           </div>
           <div className="rate">
-            <Username>myong님의 평가</Username>
+            <Username>{reviewData.username}님의 평가</Username>
             <Rate>
               <StarIcon src={star} />
-              <RateScore>4.5</RateScore>
+              <RateScore>{reviewData.rating}</RateScore>
             </Rate>
           </div>
-          <Review>
-            두드리는 자에게 문이 열린다고 하지만, 그렇다면 매번 힘겹게 문을
-            두드려야 하는 사람의 삶은 가혹한 것이 된다. 다가가지 못하고 그저
-            멀찍이서 흐느끼는 여인에게 소소한 기적을 허용하며, 영화는 신을
-            대신하여 관객에게도 그의 포용을 전달한다.
-          </Review>
+          <Review>{reviewData.review}</Review>
         </Text>
       </ItemContainer>
     </StyledReviewItem>

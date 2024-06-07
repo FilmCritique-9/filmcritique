@@ -1,11 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReviewItem from "./ReviewItem";
 import styled from "styled-components";
 
+import { instance } from "../../api/instance";
+
 const ReviewList = () => {
+  const [reviewList, setReviewList] = useState([]);
+  useEffect(() => {
+    const fetchReviewData = async () => {
+      try {
+        const res = await instance.get("critique/review/");
+        if (res.status === 200) {
+          setReviewList(res.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchReviewData();
+  }, []);
+console.log(reviewList);
   return (
     <ReviewItemContainer>
-      <ReviewItem />
+      {reviewList?.map((item) => (
+        <ReviewItem key={item.id} reviewData={item} />
+      ))}
     </ReviewItemContainer>
   );
 };

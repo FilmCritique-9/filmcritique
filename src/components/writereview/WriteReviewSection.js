@@ -1,16 +1,29 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Line from "../common/Line";
 import styled from "styled-components";
 import uploadposter from "../../assets/icon/poster.png";
 import { DisplayMd, BodyMediumXs } from "../../styles/font";
 import StarRate from "./StarRate";
-const WriteReviewSection = () => {
+import { Rating } from "react-simple-star-rating";
+import { upload } from "@testing-library/user-event/dist/upload";
+import { instance } from "../../api/instance";
+import { useParams } from "react-router-dom";
+
+const WriteReviewSection = ({
+  reviewData,
+  onReviewDataChange,
+  onSubmit,
+  formRef,
+}) => {
+ 
   const [inputValues, setInputValues] = useState({
     title: "",
     review: "",
     username: "",
     password: "",
   });
+
+  const { reviewid } = useParams();
 
   const [previewSource, setPreviewSource] = useState(uploadposter);
   const fileInputRef = useRef(null);
@@ -38,9 +51,41 @@ const WriteReviewSection = () => {
     fileInputRef.current.click();
   };
 
+
+  const handleImgUpload = (e) => {
+    if (!e.target.files) return;
+    const uploadFile = e.target.files[0];
+    onReviewDataChange({
+      ...reviewData,
+      poster: uploadFile,
+    });
+  };
+
+  const handleRatingChange = (rating) => {
+    onReviewDataChange({
+      ...reviewData,
+      rating,
+    });
+  }
+
+  useEffect(() => {
+    if (reviewid) {
+      const fetchReviewData = async () => {
+        try {
+          const res = await instance.get(`/critique/review/${reviewid}/`);
+          onReviewDataChange(res.data);
+        } catch (err) {
+          alert(err);
+        }
+    };
+    fetchReviewData();
+  }
+  }, [reviewid, onReviewDataChange])
+
   return (
     <WriteReviewContainer>
       <Line />
+      <form onSubmit={onSubmit} ref={formRef}>
       <div className="poster">
         <DisplayMd>Poster</DisplayMd>
         <PosterImg src={previewSource} onClick={handleImageClick} />
@@ -55,67 +100,73 @@ const WriteReviewSection = () => {
       <div className="film-title">
         <div className="word-limit">
           <DisplayMd>Film Title</DisplayMd>
-          <BodyMediumXs>{inputValues.title.length}/30</BodyMediumXs>
+          <BodyMediumXs>{reviewData.title.length}/30</BodyMediumXs>
         </div>
         <ShortInput
           name="title"
           onChange={onInputHandler}
           maxLength="30"
-          value={inputValues.title}
+          value={reviewData.title}
         />
       </div>
       <Line />
       <div className="rate">
         <DisplayMd>Rate</DisplayMd>
-        <StarRate />
+        <StarRate onChange={handleRatingChange} value={reviewData.rating}/>
       </div>
       <Line />
       <div className="date-watched">
         <DisplayMd>Date Watched</DisplayMd>
-        <ShortInput name="dateWatched" onChange={onInputHandler} />
+        <ShortInput 
+          name="dateWatched"
+          onChange={onInputHandler}
+          placeholder=""
+          value={reviewData.dateWatched} 
+        />
       </div>
       <Line />
       <div className="review">
         <div className="word-limit">
           <DisplayMd>Review</DisplayMd>
-          <BodyMediumXs>{inputValues.review.length}/1000</BodyMediumXs>
+          <BodyMediumXs>{reviewData.review.length}/1000</BodyMediumXs>
         </div>
         <ReviewInput
           name="review"
           onChange={onInputHandler}
           maxLength="1000"
-          value={inputValues.review}
+          value={reviewData.review}
         />
       </div>
       <Line />
       <div className="username">
         <div className="word-limit">
           <DisplayMd>Username</DisplayMd>
-          <BodyMediumXs>{inputValues.username.length}/20</BodyMediumXs>
+          <BodyMediumXs>{reviewData.username.length}/20</BodyMediumXs>
         </div>
         <ShortInput
           name="username"
           onChange={onInputHandler}
           maxLength="20"
-          value={inputValues.username}
+          value={reviewData.username}
         />
       </div>
       <Line />
       <div className="password">
         <div className="word-limit">
           <DisplayMd>Password</DisplayMd>
-          <BodyMediumXs>{inputValues.password.length}/6</BodyMediumXs>
+          <BodyMediumXs>{reviewData.password.length}/6</BodyMediumXs>
         </div>
         <ShortInput
           name="password"
           onChange={onInputHandler}
           maxLength="6"
-          value={inputValues.password}
+          value={reviewData.password}
         />
       </div>
+    </form>
     </WriteReviewContainer>
   );
-};
+  };
 
 export default WriteReviewSection;
 

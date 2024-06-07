@@ -1,30 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import star from "../../assets/icon/whitestar.svg";
+import { instance } from "../../api/instance";
+import { useParams } from "react-router-dom";
+import dayjs from "dayjs"
+
 const DetailReviewSection = () => {
+  const [review, setReview] = useState({});
+  const { reviewid } = useParams();
+  useEffect(() => {
+    const fetchReviewData = async () => {
+      try {
+        const res = await instance.get(`/critique/review/${reviewid}/`);
+        setReview(res.data);
+      } catch (err) {
+        alert(err);
+      }
+    };
+    fetchReviewData();
+  }, {reviewid});
+
   return (
     <DetailReviewContainer>
-      <PosterImg />
+      <PosterImg src={review?.poster} />
       <Dim />
       <div className="top">
-        <MovieTitle>녹색 광선</MovieTitle>
-        <Username>myong님의 평가</Username>
+        <MovieTitle>{review?.title}</MovieTitle>
+        <Username>{review?.username}님의 평가</Username>
         <Rate>
           <StarIcon src={star} />
-          <RateScore>4.5</RateScore>
+          <RateScore>{review?.rating}</RateScore>
         </Rate>
       </div>
 
       <div className="bottom">
         <Review>
-          두드리는 자에게 문이 열린다고 하지만, 그렇다면 매번 힘겹게 문을
-          두드려야 하는 사람의 삶은 가혹한 것이 된다. 다가가지 못하고 그저
-          멀찍이서 흐느끼는 여인에게 소소한 기적을 허용하며, 영화는 신을
-          대신하여 관객에게도 그의 포용을 전달한다.
+          {review?.review}
         </Review>
         <div className="time">
-          <WatchTime>관람일:2024.05.24</WatchTime>
-          <UploadTime>작성일: 2024.06.01.17:42</UploadTime>
+          <WatchTime>관람일:{review?.date_watched}</WatchTime>
+          <UploadTime>작성일: {dayjs(review?.created_at).format("YYYY-MM-DD HH:mm")}</UploadTime>
         </div>
       </div>
     </DetailReviewContainer>
